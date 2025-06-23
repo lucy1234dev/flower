@@ -22,6 +22,12 @@ DATA_DIR = "data"
 PRODUCTS_FILE = os.path.join(DATA_DIR, "products.json")
 os.makedirs(DATA_DIR, exist_ok=True)
 
+def ensure_file_exists(file_path: str) -> None:
+    """Create the file with [] if it doesn't exist (for products)."""
+    if not os.path.exists(file_path):
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump([], f)
+
 
 class ProductCreate(BaseModel):
     """Schema for creating a product."""
@@ -44,8 +50,7 @@ def load_products() -> List[Dict[str, Any]]:
     Returns:
         List[Dict[str, Any]]: List of products.
     """
-    if not os.path.exists(PRODUCTS_FILE):
-        return []
+    ensure_file_exists(PRODUCTS_FILE)
 
     try:
         with open(PRODUCTS_FILE, "r", encoding="utf-8") as file:
