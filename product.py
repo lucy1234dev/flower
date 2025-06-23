@@ -108,3 +108,34 @@ def add_product(product: ProductCreate):
     save_products(products)
 
     return new_product
+
+from fastapi import HTTPException, Path
+
+@router.delete("/delete-product/{product_id}")
+def delete_product(product_id: str = Path(..., description="ID of the product to delete")):
+    """
+    Delete a product by its ID.
+
+    Args:
+        product_id (str): The ID of the product to delete.
+
+    Returns:
+        dict: Success message.
+    """
+    products = load_products()
+
+    #  Look for the product by ID
+    matching_product = next((p for p in products if p["id"] == product_id), None)
+
+    #  If it’s not found, return error
+    if not matching_product:
+        raise HTTPException(status_code=404, detail="Product not found.")
+
+    #  Remove it from the list
+    updated_products = [p for p in products if p["id"] != product_id]
+
+    #  Save the new product list
+    save_products(updated_products)
+
+    return {"message": f"✅ Product with ID {product_id} deleted successfully."}
+
