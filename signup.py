@@ -28,6 +28,12 @@ USERS_FILE = os.path.join(DATA_DIR, "users.json")
 OTPS_FILE = os.path.join(DATA_DIR, "otps.json")
 os.makedirs(DATA_DIR, exist_ok=True)
 
+def ensure_file_exists(file_path: str) -> None:
+    """Make sure the JSON file exists, and create it with {} if missing."""
+    if not os.path.exists(file_path):
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+
 
 class UserCreate(BaseModel):
     """Schema for creating a user."""
@@ -55,8 +61,8 @@ class UserLogin(BaseModel):
 
 def load_data(file_path: str) -> Dict[str, Any]:
     """Load JSON data from a file."""
-    if not os.path.exists(file_path):
-        return {}
+    ensure_file_exists(file_path)
+    
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return json.load(file)
