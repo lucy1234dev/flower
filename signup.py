@@ -231,7 +231,7 @@ def delete_user(email: str = Path(..., description="Email of the user to delete"
     save_data(USERS_FILE, users)
 
     return {"message": f"User with email {email} has been deleted."}
-    @router.put("/update-user/{email}")
+@router.put("/update-user/{email}")
 def update_user(email: str, data: UserUpdate):
     """
     Update a user's name and password by email.
@@ -252,6 +252,6 @@ def update_user(email: str, data: UserUpdate):
     users[email]["password"] = data.password
     save_data(USERS_FILE, users)
 
-    return {"message": f"✅ User {email} updated successfully."}
+    return {"message": f" User {email} updated successfully."}
 
 
