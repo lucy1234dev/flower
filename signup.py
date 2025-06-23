@@ -212,3 +212,19 @@ def get_verified_users():
 def home():
     """API welcome message."""
     return {"message": "🌼 Welcome to Flower Shop Signup API 🌼"}
+
+from fastapi import Path
+
+@router.delete("/delete-user/{email}")
+def delete_user(email: str = Path(..., description="Email of the user to delete")):
+    """Delete a user by email."""
+    users = load_data(USERS_FILE)
+
+    if email not in users:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    del users[email]
+    save_data(USERS_FILE, users)
+
+    return {"message": f"User with email {email} has been deleted."}
+
