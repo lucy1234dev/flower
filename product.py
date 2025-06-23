@@ -41,6 +41,13 @@ class ProductCreate(BaseModel):
 class Product(ProductCreate):
     """Schema for returning product with ID."""
     id: str
+class ProductUpdate(BaseModel):
+    """Schema for updating a product."""
+    name: str
+    price: float
+    categories: str
+    page: str
+    image: str
 
 
 def load_products() -> List[Dict[str, Any]]:
@@ -138,4 +145,29 @@ def delete_product(product_id: str = Path(..., description="ID of the product to
     save_products(updated_products)
 
     return {"message": f"✅ Product with ID {product_id} deleted successfully."}
+    @router.put("/update-product/{product_id}", response_model=Product)
+def update_product(product_id: str, updated: ProductUpdate):
+    """
+    Update an existing product.
+
+    Args:
+        product_id (str): The ID of the product to update.
+        updated (ProductUpdate): New data for the product.
+
+    Returns:
+        Product: The updated product.
+    """
+    products = load_products()
+    for product in products:
+        if product["id"] == product_id:
+            product["name"] = updated.name
+            product["price"] = updated.price
+            product["categories"] = updated.categories
+            product["page"] = updated.page
+            product["image"] = updated.image
+            save_products(products)
+            return product
+
+    raise HTTPException(status_code=404, detail="Product not found.")
+
 
