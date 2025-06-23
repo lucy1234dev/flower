@@ -145,7 +145,7 @@ def delete_product(product_id: str = Path(..., description="ID of the product to
     save_products(updated_products)
 
     return {"message": f" Product with ID {product_id} deleted successfully."}
-    @router.put("/update-product/{product_id}", response_model=Product)
+@router.put("/update-product/{product_id}", response_model=Product)
 def update_product(product_id: str, updated: ProductUpdate):
     """
     Update an existing product.
