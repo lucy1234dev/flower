@@ -57,6 +57,10 @@ class UserLogin(BaseModel):
     """Schema for user login."""
     email: str
     password: str
+class UserUpdate(BaseModel):
+    """Schema for updating user details."""
+    name: str
+    password: str
 
 
 def load_data(file_path: str) -> Dict[str, Any]:
@@ -227,4 +231,27 @@ def delete_user(email: str = Path(..., description="Email of the user to delete"
     save_data(USERS_FILE, users)
 
     return {"message": f"User with email {email} has been deleted."}
+    @router.put("/update-user/{email}")
+def update_user(email: str, data: UserUpdate):
+    """
+    Update a user's name and password by email.
+
+    Args:
+        email (str): Email of the user to update.
+        data (UserUpdate): New user data.
+
+    Returns:
+        dict: Success message.
+    """
+    users = load_data(USERS_FILE)
+
+    if email not in users:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    users[email]["name"] = data.name
+    users[email]["password"] = data.password
+    save_data(USERS_FILE, users)
+
+    return {"message": f"✅ User {email} updated successfully."}
+
 
