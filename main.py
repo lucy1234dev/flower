@@ -4,13 +4,10 @@ from product import router as product_router
 
 app = FastAPI()
 
-# Root route to avoid "Not Found" on home
-@app.get("/")
-def read_root():
-    """read root of the application"""
-
-    return {"message": "🌸 Welcome to the Flower Shop API!"}
-
-# Include feature-specific routers
+# Register routers
 app.include_router(signup_router)
 app.include_router(product_router)
+
+@app.get("/")
+def home():
+    return {"message": "🌼 Welcome to Flower Shop Signup API 🌼"}
