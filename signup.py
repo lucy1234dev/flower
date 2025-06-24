@@ -213,7 +213,7 @@ def get_verified_users():
 
 
 @router.get("/")
-def home():
+def home_signup():
     """API welcome message."""
     return {"message": "🌼 Welcome to Flower Shop Signup API 🌼"}
 
