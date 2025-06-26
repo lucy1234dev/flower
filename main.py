@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.api_route("/", methods=["GET","HEAD"])
+@app.api_route("/")
 def read_root():
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
