@@ -9,7 +9,7 @@ app = FastAPI()
 #  Enable CORS to allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠ Replace "*" with specific domain in production
+    allow_origins=["https://ideal12.nettlify.app"],  #  Replace "*" with specific domain in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
