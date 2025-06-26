@@ -103,6 +103,7 @@ def generate_otp() -> str:
 @router.post("/signup")
 def signup(user: UserCreate):
     """Register a new user and store OTP."""
+    print("[Frontend Signup Data]", user.dict())
     users = load_data(USERS_FILE)
     otps = load_data(OTPS_FILE)
 
