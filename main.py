@@ -23,6 +23,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
+    """Root welcome route that supports GET and HEAD."""
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
 app.include_router(signup_router)
