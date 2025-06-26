@@ -127,7 +127,13 @@ def signup(user: UserCreate):
     save_data(OTPS_FILE, otps)
 
     print(f"[OTP] Your OTP for {user.email} is: {otp}")
-    return {"message": "User registered. OTP sent to console."}
+    # Send OTP back to the frontend
+    return {
+        "message": "User registered successfully. OTP sent.",
+        "otp": otp,
+        "email": user.email
+    }
+   
 
 
 @router.post("/verify-otp")
