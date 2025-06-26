@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # ✅ Add this
+from fastapi.middleware.cors import CORSMiddleware  # Add this
 
 from signup import router as signup_router
 from product import router as product_router
@@ -9,7 +9,7 @@ app = FastAPI()
 #  Enable CORS to allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ Replace "*" with specific domain in production
+    allow_origins=["*"],  # ⚠ Replace "*" with specific domain in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
