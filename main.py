@@ -1,13 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # ✅ Add this
+
 from signup import router as signup_router
 from product import router as product_router
 
 app = FastAPI()
 
-# Register routers
+#  Enable CORS to allow frontend to talk to backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ⚠️ Replace "*" with specific domain in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Root route to avoid "Not Found" on home
+@app.get("/")
+def read_root():
+    """read root of the application"""
+    return {"message": "🌸 Welcome to the Flower Shop API!"}
+
+# Include feature-specific routers
 app.include_router(signup_router)
 app.include_router(product_router)
 
-@app.get("/")
-def home():
-    return {"message": "🌼 Welcome to Flower Shop Signup API 🌼"}
