@@ -1,33 +1,40 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
 from signup import router as signup_router
 from product import router as product_router
 
 app = FastAPI()
 
-# ✅ This list must contain your frontend domain
+#  Allow your frontend origins
 origins = [
-    "https://ideal12.netlify.app",  # Your frontend (Netlify)
-    "http://127.0.0.1:5500",        # Local testing (optional)
+    "https://ideal12.netlify.app",  # Deployed frontend
+    "http://127.0.0.1:5500",        # Local dev
     "http://localhost:5500"
 ]
 
-#  This is what actually allows the browser to talk to your API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # Only allow these origins
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.api_route("/")
-def read_root():
+# Support GET, POST, and OPTIONS for root
+@app.api_route("/", methods=["GET", "POST", "OPTIONS"], include_in_schema=False)
+async def read_root(request: Request):
+    if request.method == "OPTIONS":
+        return JSONResponse(content={"message": "Preflight OK"})
+    elif request.method == "POST":
+        return JSONResponse(content={"message": "POST not allowed on this route"})
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
-# Include routers
+# Include other route groups
 app.include_router(signup_router)
 app.include_router(product_router)
+
 
 
 
