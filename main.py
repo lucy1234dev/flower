@@ -22,6 +22,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#  Optional: Global fallback for OPTIONS (to prevent 400 errors)
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return JSONResponse(content={"message": f"Preflight OK for /{rest_of_path}"})
+
 # Support GET, POST, and OPTIONS for root
 @app.api_route("/", methods=["GET", "POST", "OPTIONS"], include_in_schema=False)
 async def read_root(request: Request):
