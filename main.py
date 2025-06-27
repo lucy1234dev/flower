@@ -7,38 +7,52 @@ from product import router as product_router
 
 app = FastAPI()
 
-#  Allow your frontend origins
+# CORS Configuration - More permissive for debugging
 origins = [
-    "https://ideal12.netlify.app",  # Deployed frontend
+    "https://ideal12.netlify.app",  # Your deployed frontend
     "http://127.0.0.1:5500",        # Local dev
-    "http://localhost:5500"
+    "http://localhost:5500",
+    "https://*.netlify.app",        # Allow all netlify subdomains
+    "*"  # Temporarily allow all origins for debugging - remove in production
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["*"],  # Temporarily allow all origins
+    allow_credentials=False,  # Set to False when using "*" for origins
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
 )
 
-#  Optional: Global fallback for OPTIONS (to prevent 400 errors)
-@app.options("/{rest_of_path:path}")
-async def preflight_handler(rest_of_path: str):
-    return JSONResponse(content={"message": f"Preflight OK for /{rest_of_path}"})
-
-# Support GET, POST, and OPTIONS for root
-@app.api_route("/", methods=["GET", "POST", "OPTIONS"], include_in_schema=False)
-async def read_root(request: Request):
+# Handle preflight requests globally
+@app.middleware("http")
+async def cors_handler(request: Request, call_next):
     if request.method == "OPTIONS":
-        return JSONResponse(content={"message": "Preflight OK"})
-    elif request.method == "POST":
-        return JSONResponse(content={"message": "POST not allowed on this route"})
+        response = JSONResponse({"message": "OK"})
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
+    response = await call_next(request)
+    return response
+
+# Root endpoint with proper method handling
+@app.get("/")
+async def read_root():
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
-# Include other route groups
+@app.options("/")
+async def root_options():
+    return JSONResponse({"message": "Preflight OK"})
+
+# Include routers
 app.include_router(signup_router)
 app.include_router(product_router)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=10000)
 
 
 
