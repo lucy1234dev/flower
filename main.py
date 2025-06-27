@@ -33,14 +33,21 @@ async def cors_handler(request: Request, call_next):
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "*"
         return response
-
+    
     response = await call_next(request)
     return response
 
 # Root endpoint with proper method handling
 @app.get("/")
 async def read_root():
+    """async read root"""
     return {"message": "🌸 Welcome to the Flower Shop API!"}
+
+@app.post("/")
+
+async def root_post():
+    """async post root"""
+    return JSONResponse({"error": "POST not allowed on root. Use /signup for registration."}, status_code=405)
 
 @app.options("/")
 async def root_options():
