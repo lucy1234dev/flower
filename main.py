@@ -1,78 +1,62 @@
-"""
-FastAPI application for Flower Shop API with CORS configuration.
-
-This module sets up the main FastAPI application with proper CORS middleware
-to handle cross-origin requests from the frontend deployed on Netlify.
-"""
-
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from signup import router as signup_router
 from product import router as product_router
 
-# Initialize FastAPI application
-app = FastAPI(
-    title="Flower Shop API",
-    description="A REST API for flower shop operations including user signup and product management",
-    version="1.0.0"
-)
+app = FastAPI()
 
-# CORS Configuration - Production Ready
+# CORS Configuration - More permissive for debugging
 origins = [
     "https://ideal12.netlify.app",  # Your deployed frontend
-    "http://127.0.0.1:5500",        # Local development
+    "http://127.0.0.1:5500",        # Local dev
     "http://localhost:5500",
-    "http://localhost:3000",        # Common React dev server
-    "http://localhost:8000",        # Common Vue/other dev servers
+    "https://*.netlify.app",        # Allow all netlify subdomains
+    "*"  # Temporarily allow all origins for debugging - remove in production
 ]
 
-# Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # Use specific origins for security
-    allow_credentials=True,         # Allow cookies/auth headers
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=["*"],  # Temporarily allow all origins
+    allow_credentials=False,  # Set to False when using "*" for origins
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
-    expose_headers=["*"]
 )
 
-# For debugging only - you can temporarily use this instead:
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=False,  # Must be False with "*"
-#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#     allow_headers=["*"],
-# )
+# Handle preflight requests globally
+@app.middleware("http")
+async def cors_handler(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = JSONResponse({"message": "OK"})
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
 
+    response = await call_next(request)
+    return response
 
+# Root endpoint with proper method handling
 @app.get("/")
 async def read_root():
-    """
-    Root endpoint that returns a welcome message.
-    
-    Returns:
-        dict: A welcome message for the Flower Shop API
-    """
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
+@app.post("/")
+async def root_post():
+    """Handle POST requests to root - redirect to proper endpoint."""
+    raise HTTPException(
+        status_code=400,
+        detail="POST requests should be made to specific endpoints like /signup, not the root path."
+    )
 
-@app.get("/health")
-async def health_check():
-    """
-    Health check endpoint for monitoring API status.
-    
-    Returns:
-        dict: Status information indicating if the API is running
-    """
-    return {"status": "healthy", "message": "API is running"}
+@app.options("/")
+async def root_options():
+    return JSONResponse({"message": "Preflight OK"})
 
-
-# Include routers for different functionalities
+# Include routers
 app.include_router(signup_router)
 app.include_router(product_router)
-
 
 if __name__ == "__main__":
     import uvicorn
