@@ -1,61 +1,78 @@
-from fastapi import FastAPI, Request
+"""
+FastAPI application for Flower Shop API with CORS configuration.
+
+This module sets up the main FastAPI application with proper CORS middleware
+to handle cross-origin requests from the frontend deployed on Netlify.
+"""
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from signup import router as signup_router
 from product import router as product_router
 
-app = FastAPI()
-
-# CORS Configuration - More permissive for debugging
-origins = [
-    "https://ideal12.netlify.app",  # Your deployed frontend
-    "http://127.0.0.1:5500",        # Local dev
-    "http://localhost:5500",
-    "https://*.netlify.app",        # Allow all netlify subdomains
-    "*"  # Temporarily allow all origins for debugging - remove in production
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all origins
-    allow_credentials=False,  # Set to False when using "*" for origins
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["*"],
+# Initialize FastAPI application
+app = FastAPI(
+    title="Flower Shop API",
+    description="A REST API for flower shop operations including user signup and product management",
+    version="1.0.0"
 )
 
-# Handle preflight requests globally
-@app.middleware("http")
-async def cors_handler(request: Request, call_next):
-    if request.method == "OPTIONS":
-        response = JSONResponse({"message": "OK"})
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
-    
-    response = await call_next(request)
-    return response
+# CORS Configuration - Production Ready
+origins = [
+    "https://ideal12.netlify.app",  # Your deployed frontend
+    "http://127.0.0.1:5500",        # Local development
+    "http://localhost:5500",
+    "http://localhost:3000",        # Common React dev server
+    "http://localhost:8000",        # Common Vue/other dev servers
+]
 
-# Root endpoint with proper method handling
+# Add CORS middleware to handle cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # Use specific origins for security
+    allow_credentials=True,         # Allow cookies/auth headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
+
+# For debugging only - you can temporarily use this instead:
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=False,  # Must be False with "*"
+#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#     allow_headers=["*"],
+# )
+
+
 @app.get("/")
 async def read_root():
-    """async read root"""
+    """
+    Root endpoint that returns a welcome message.
+    
+    Returns:
+        dict: A welcome message for the Flower Shop API
+    """
     return {"message": "🌸 Welcome to the Flower Shop API!"}
 
-@app.post("/")
 
-async def root_post():
-    """async post root"""
-    return JSONResponse({"error": "POST not allowed on root. Use /signup for registration."}, status_code=405)
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for monitoring API status.
+    
+    Returns:
+        dict: Status information indicating if the API is running
+    """
+    return {"status": "healthy", "message": "API is running"}
 
-@app.options("/")
-async def root_options():
-    return JSONResponse({"message": "Preflight OK"})
 
-# Include routers
+# Include routers for different functionalities
 app.include_router(signup_router)
 app.include_router(product_router)
+
 
 if __name__ == "__main__":
     import uvicorn
