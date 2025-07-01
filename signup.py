@@ -213,6 +213,14 @@ def signup(user: UserCreate):
     # Validate email format
     if not is_valid_email(user.email):
         raise HTTPException(status_code=400, detail="Invalid email format.")
+    if not user.name.strip():
+        raise HTTPException(status_code=400, detail="Name field cannot be empty.")
+
+    if not is_valid_email(user.email):
+        raise HTTPException(status_code=400, detail="Invalid email format.")
+
+    if not is_strong_password(user.password):
+        raise HTTPException(status_code=400, detail="Password must contain uppercase, lowercase, and digit.")   
 
     users = load_data(USERS_FILE)
     otps = load_data(OTPS_FILE)
