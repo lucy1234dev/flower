@@ -234,7 +234,7 @@ def signup(user: UserCreate):
     users[user.email] = {
         "id": str(uuid.uuid4()),
         "first_name": user.first_name,
-        "last_name": user.last_name
+        "last_name": user.last_name,
         "email": user.email,
         "password": user.password,
         "verified": False
