@@ -394,6 +394,16 @@ def login(data: UserLogin):
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
     return {"message": f"Login successful. Welcome {user['name']}!"}
+    
+@router.get("/login")
+def login_info():
+    """
+    Provide information about login endpoint for GET requests.
+
+    Returns:
+        dict: Message instructing the user to use POST method.
+    """
+    return {"message": "Please use POST method to log in with your credentials."}
 
 
 @router.get("/users")
