@@ -46,15 +46,10 @@ def ensure_file_exists(file_path: str) -> None:
 class UserCreate(BaseModel):
     """
     Schema for creating a user.
-
-    Attributes:
-        name (str): User's full name.
-        email (str): User's email address.
-        password (str): User's password.
     """
-    name: str
-    email: str
-    password: str
+    name: str = Field(..., min_length=1, description="User's full name (non-empty)")
+    email: EmailStr
+    password: str = Field(..., min_length=8, description="User password (min 8 characters)")
 
 
 class OTPVerify(BaseModel):
