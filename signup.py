@@ -44,11 +44,9 @@ def ensure_file_exists(file_path: str) -> None:
 
 
 class UserCreate(BaseModel):
-    """
-    Schema for creating a user.
-    """
-    name: str = Field(..., min_length=1, description="User's full name (non-empty)")
-    email: EmailStr
+    first_name: str = Field(..., min_length=1, description="User's first name")
+    last_name: str = Field(..., min_length=1, description="User's last name")
+    email: str = Field(..., description="User's email address")
     password: str = Field(..., min_length=8, description="User password (min 8 characters)")
 
 
@@ -235,7 +233,8 @@ def signup(user: UserCreate):
     # Register/Update user
     users[user.email] = {
         "id": str(uuid.uuid4()),
-        "name": user.name,
+        "first_name": user.first_name,
+        "last_name": user.last_name
         "email": user.email,
         "password": user.password,
         "verified": False
