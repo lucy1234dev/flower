@@ -389,7 +389,7 @@ def login(data: UserLogin):
     if user["password"] != data.password:
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
-    return {"message": f"Login successful. Welcome {user['name']}!"}
+    return {"message": f"Login successful. Welcome {user['first_name']} {user['last_name]}!"}
     
 @router.get("/login")
 def login_info():
