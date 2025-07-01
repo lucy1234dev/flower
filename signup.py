@@ -44,9 +44,9 @@ def ensure_file_exists(file_path: str) -> None:
 
 
 class UserCreate(BaseModel):
-    first_name: str = Field(..., min_length=1, description="User's first name")
-    last_name: str = Field(..., min_length=1, description="User's last name")
-    email: str = Field(..., description="User's email address")
+    first_name: str
+    last_name: str
+    email: EmailStr
     password: str = Field(..., min_length=8, description="User password (min 8 characters)")
 
 
@@ -182,7 +182,6 @@ async def signup_options():
     """
     return JSONResponse({"message": "OK"})
 
-
 @router.post("/signup")
 def signup(user: UserCreate):
     """
@@ -193,7 +192,7 @@ def signup(user: UserCreate):
     for unverified users.
 
     Args:
-        user (UserCreate): User registration data containing name, email, and password.
+        user (UserCreate): User registration data containing first_name, last_name, email, and password.
 
     Returns:
         dict: Response containing success message, OTP, and email.
@@ -206,31 +205,29 @@ def signup(user: UserCreate):
     # Validate email format
     if not is_valid_email(user.email):
         raise HTTPException(status_code=400, detail="Invalid email format.")
-    if not user.name.strip():
-        raise HTTPException(status_code=400, detail="Name field cannot be empty.")
 
-    if not is_valid_email(user.email):
-        raise HTTPException(status_code=400, detail="Invalid email format.")
+    # Validate first and last names
+    if not user.first_name.strip() or not user.last_name.strip():
+        raise HTTPException(status_code=400, detail="First and last name cannot be empty.")
 
+    # Validate password
     if not is_strong_password(user.password):
-        raise HTTPException(status_code=400, detail="Password must contain uppercase, lowercase, and digit.")   
+        raise HTTPException(status_code=400, detail="Password must contain uppercase, lowercase, and digit.")
 
     users = load_data(USERS_FILE)
     otps = load_data(OTPS_FILE)
 
     # Check if email already exists
     if user.email in users:
-        # Check if user is already verified
         if users[user.email].get("verified", False):
             raise HTTPException(
                 status_code=400,
                 detail="Email already registered and verified. Please login instead."
             )
         else:
-            # User exists but not verified - allow re-registration
             print(f"[INFO] Re-registering unverified user: {user.email}")
 
-    # Register/Update user
+    # Register or update user
     users[user.email] = {
         "id": str(uuid.uuid4()),
         "first_name": user.first_name,
@@ -251,12 +248,12 @@ def signup(user: UserCreate):
 
     print(f"[OTP] Your OTP for {user.email} is: {otp}")
 
-    # Send OTP back to the frontend
     return {
         "message": "User registered successfully. OTP sent.",
         "otp": otp,
         "email": user.email
     }
+
 
 
 @router.options("/verify-otp")
