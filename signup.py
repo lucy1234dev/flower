@@ -19,7 +19,7 @@ from typing import Dict, Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr,Field
 
 # Initialize FastAPI router for signup-related endpoints
 router = APIRouter()
