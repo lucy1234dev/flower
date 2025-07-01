@@ -83,7 +83,7 @@ class UserLogin(BaseModel):
         password (str): User's password.
     """
     email: str
-    password: str
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters.")
 
 
 class UserUpdate(BaseModel):
@@ -377,19 +377,10 @@ async def login_options():
 def login(data: UserLogin):
     """
     Authenticate a registered and verified user.
-
-    Validates user credentials and verification status before
-    allowing login access.
-
-    Args:
-        data (UserLogin): Login credentials containing email and password.
-
-    Returns:
-        dict: Success message with welcome text.
-
-    Raises:
-        HTTPException: 404 if user not found, 403 if not verified, 401 if wrong password.
     """
+    if not data.password.strip():
+        raise HTTPException(status_code=400, detail="Password cannot be empty.")
+
     users = load_data(USERS_FILE)
     user = users.get(data.email)
 
